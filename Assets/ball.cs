@@ -1,4 +1,6 @@
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ball : MonoBehaviour
 {
@@ -28,9 +30,10 @@ public class ball : MonoBehaviour
         Invoke("GoBall", 2);
     }
 
-    // Determina o comportamento da bola nas colisões com os Players
+    // Determina o comportamento da bola nas colisões
     void OnCollisionEnter2D(Collision2D coll)
     {
+        // Colisão com os Players
         if (coll.collider.CompareTag("Player"))
         {
             Vector2 vel;
@@ -40,6 +43,12 @@ public class ball : MonoBehaviour
                     (coll.collider.attachedRigidbody.linearVelocity.y / 3);
 
             rb2d.linearVelocity = vel;
+        }
+
+        // Se a bola cair na BottomWall, reinicia o jogo
+        if (coll.collider.CompareTag("BottomWall"))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 
