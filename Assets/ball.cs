@@ -4,89 +4,131 @@ using UnityEngine.SceneManagement;
 public class ball : MonoBehaviour
 {
     private Rigidbody2D rb2d;
-
-    public float ballSpeed = 10f;
-
-    void GoBall()
-    {
-        float rand = Random.Range(0, 2);
-
-        if (rand < 1)
-        {
-            rb2d.linearVelocity = new Vector2(-0.7f, 1f).normalized * ballSpeed;
-        }
-        else
-        {
-            rb2d.linearVelocity = new Vector2(0.7f, 1f).normalized * ballSpeed;
-        }
-    }
+    private bool canCollide = true;
+    
+    public float ballSpeed = 8f;
+    public float minAngle = 20f;
+    public float maxAngle = 70f;
+    
+    private Vector2 startPosition;
 
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
-
+        startPosition = transform.position;
+        
+        rb2d.gravityScale = 1f;
+        rb2d.linearDamping = 0;
+        rb2d.angularDamping = 0;
+        rb2d.sharedMaterial = null;
+        rb2d.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        
         Invoke("GoBall", 2);
+    }
+
+    void GoBall()
+    {
+        float angle = Random.Range(minAngle, maxAngle);
+        
+        if (Random.Range(0, 2) == 0)
+        {
+            angle = -angle;
+        }
+        
+        float rad = angle * Mathf.Deg2Rad;
+        Vector2 direction = new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)).normalized;
+        
+        rb2d.linearVelocity = direction * ballSpeed;
+        canCollide = true;
     }
 
     void OnCollisionEnter2D(Collision2D coll)
     {
-        // Colisão com a raquete
+        if (!canCollide) return;
+        
+        // RAQUETE
         if (coll.collider.CompareTag("Player"))
         {
-            // Verifica em qual lado da raquete a bola bateu
-            float hitPoint = transform.position.x - coll.transform.position.x;
-
-            // Define se a bola vai para a esquerda ou direita
-            float directionX;
-
-            if (hitPoint < 0)
+            canCollide = false;
+            
+            float hitPoint = (transform.position.x - coll.transform.position.x) / coll.collider.bounds.size.x;
+            float angle = -hitPoint * maxAngle;
+            
+            if (Mathf.Abs(angle) < minAngle)
             {
-                directionX = -0.7f;
+                angle = Mathf.Sign(angle) * minAngle;
+            }
+            
+            float rad = angle * Mathf.Deg2Rad;
+            Vector2 direction = new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)).normalized;
+            
+            rb2d.linearVelocity = direction * ballSpeed;
+            
+            Invoke("EnableCollision", 0.1f);
+        }
+        
+        // BLOCOS
+        if (coll.gameObject.CompareTag("Brick"))
+        {
+            Brick brickScript = coll.gameObject.GetComponent<Brick>();
+            if (brickScript != null && ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.AddScore(brickScript.points);
+            }
+            
+            Destroy(coll.gameObject);
+            
+            Vector2 normal = coll.contacts[0].normal;
+            Vector2 newVelocity = Vector2.Reflect(rb2d.linearVelocity.normalized, normal);
+            
+            float angleDeg = Mathf.Atan2(Mathf.Abs(newVelocity.y), Mathf.Abs(newVelocity.x)) * Mathf.Rad2Deg;
+            if (angleDeg < minAngle)
+            {
+                newVelocity.y = Mathf.Sign(newVelocity.y) * 0.3f;
+                newVelocity.Normalize();
+            }
+            
+            rb2d.linearVelocity = newVelocity * ballSpeed;
+        }
+        
+        // PAREDES
+        if (coll.collider.CompareTag("LeftWall") || coll.collider.CompareTag("RightWall") || coll.collider.CompareTag("TopWall"))
+        {
+            if (rb2d.linearVelocity.magnitude > 0)
+            {
+                rb2d.linearVelocity = rb2d.linearVelocity.normalized * ballSpeed;
+            }
+        }
+        
+        // CHÃO - PERDE UMA VIDA
+        if (coll.collider.CompareTag("BottomWall"))
+        {
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.LoseLife();
+                
+                if (ScoreManager.Instance.GetLives() > 0)
+                {
+                    ResetBall();
+                    Invoke("GoBall", 1.5f);
+                }
             }
             else
             {
-                directionX = 0.7f;
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
-
-            // A bola sempre sobe ao bater na raquete
-            Vector2 direction = new Vector2(directionX, 1f).normalized;
-
-            rb2d.linearVelocity = direction * ballSpeed;
-        }
-
-        // Impede que a bola fique andando somente para os lados
-        Vector2 velocity = rb2d.linearVelocity;
-
-        if (Mathf.Abs(velocity.y) < 3f)
-        {
-            velocity.y = velocity.y >= 0 ? 3f : -3f;
-            rb2d.linearVelocity = velocity.normalized * ballSpeed;
-        }
-
-        // Se a bola cair na BottomWall, reinicia o jogo
-        if (coll.collider.CompareTag("BottomWall"))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-
-        // Colisão com os blocos
-        if (coll.collider.CompareTag("Brick"))
-        {
-            Destroy(coll.gameObject);
         }
     }
 
-    // Reinicializa a posição e velocidade da bola
+    void EnableCollision()
+    {
+        canCollide = true;
+    }
+
     void ResetBall()
     {
         rb2d.linearVelocity = Vector2.zero;
-        transform.position = Vector2.zero;
-    }
-
-    // Reinicializa o jogo
-    void RestartGame()
-    {
-        ResetBall();
-        Invoke("GoBall", 1);
+        transform.position = startPosition;
+        canCollide = true;
     }
 }
