@@ -13,24 +13,27 @@ public class ScoreManager : MonoBehaviour
     
     [Header("Game Over")]
     public GameObject gameOverPanel;
-    public TMPro.TextMeshProUGUI finalScoreText; // Se for TextMeshPro
-    // public UnityEngine.UI.Text finalScoreText; // Se for Text normal
+    public TMPro.TextMeshProUGUI finalScoreText;
     
     private bool isGameOver = false;
     
     void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(gameObject); // Mantém entre as cenas
+        }
         else
+        {
             Destroy(gameObject);
+        }
     }
     
     void Start()
     {
         lives = initialLives;
         
-        // Garante que o GameOverPanel comece desativado
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(false);
@@ -83,11 +86,22 @@ public class ScoreManager : MonoBehaviour
         Time.timeScale = 1f;
     }
     
+    public void ResetLivesForNewLevel()
+    {
+        // Mantém o score, mas reseta as vidas
+        lives = initialLives;
+        isGameOver = false;
+        
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+        
+        Time.timeScale = 1f;
+    }
+    
     void GameOver()
     {
         isGameOver = true;
         
-        // Mostra o painel de Game Over
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
@@ -98,10 +112,9 @@ public class ScoreManager : MonoBehaviour
             Debug.LogError("GameOverPanel não está conectado no ScoreManager!");
         }
         
-        // Atualiza o score final
         if (finalScoreText != null)
         {
-            finalScoreText.text = $"Score: {score}";
+            finalScoreText.text = $"Score Final: {score}";
             Debug.Log($"Score final: {score}");
         }
         else
@@ -109,21 +122,13 @@ public class ScoreManager : MonoBehaviour
             Debug.LogError("FinalScoreText não está conectado no ScoreManager!");
         }
         
-        // Pausa o jogo
         Time.timeScale = 0f;
     }
     
     public void RestartGame()
     {
-        // Volta o tempo normal
         Time.timeScale = 1f;
-        
-        // Reseta o score e vidas
         ResetScore();
-        
-        // Recarrega a cena
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-        );
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Inicial");
     }
 }

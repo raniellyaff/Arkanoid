@@ -131,4 +131,8 @@ public class ball : MonoBehaviour
         transform.position = startPosition;
         canCollide = true;
     }
+    public void StopBall()
+    {
+        rb2d.linearVelocity = Vector2.zero;
+    }
 }
