@@ -9,11 +9,37 @@ public class UIManager : MonoBehaviour
     
     void Start()
     {
+        // Tenta encontrar os textos se não estiverem conectados
+        if (scoreText == null)
+        {
+            scoreText = GameObject.Find("ScoreText")?.GetComponent<TextMeshProUGUI>();
+            if (scoreText != null)
+                Debug.Log("✅ ScoreText encontrado automaticamente!");
+        }
+        
+        if (livesText == null)
+        {
+            livesText = GameObject.Find("LivesText")?.GetComponent<TextMeshProUGUI>();
+            if (livesText != null)
+                Debug.Log("✅ LivesText encontrado automaticamente!");
+        }
+        
         UpdateUI();
     }
     
     void Update()
     {
+        // Verifica se os textos ainda existem
+        if (scoreText == null)
+        {
+            scoreText = GameObject.Find("ScoreText")?.GetComponent<TextMeshProUGUI>();
+        }
+        
+        if (livesText == null)
+        {
+            livesText = GameObject.Find("LivesText")?.GetComponent<TextMeshProUGUI>();
+        }
+        
         UpdateUI();
     }
     

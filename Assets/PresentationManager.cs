@@ -4,22 +4,22 @@ using TMPro;
 
 public class PresentationManager : MonoBehaviour
 {
-    public float displayTime = 2.5f;
-    public TextMeshProUGUI levelText;
-    public string levelName = "NÍVEL 1";
+    public float displayTime = 2.5f; // Tempo que a tela fica visível
+    public TextMeshProUGUI presentationText;
+    public string levelText = "Boa sorte!";
     
     void Start()
     {
-        if (levelText != null)
+        if (presentationText != null)
         {
-            levelText.text = levelName;
+            presentationText.text = levelText;
         }
         
-        // Carrega a fase após o tempo
-        Invoke("LoadLevel", displayTime);
+        // Carrega a Scene1 após o tempo definido
+        Invoke("LoadGame", displayTime);
     }
     
-    void LoadLevel()
+    void LoadGame()
     {
         SceneManager.LoadScene("Scene1");
     }
