@@ -65,7 +65,7 @@ public class LevelManager : MonoBehaviour
         {
             string sceneName = SceneManager.GetActiveScene().name;
             string levelName = sceneName == "Scene1" ? "Fase 1" : "Fase 2";
-            levelCompleteText.text = $"PARABENS!\n{levelName} Concluida!";
+            levelCompleteText.text = $"PARABENS!\n{levelName} Concluida";
         }
         
         // Atualiza o texto do botão baseado na cena

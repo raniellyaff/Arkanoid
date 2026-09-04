@@ -833,7 +833,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "1. Use as teclas A e D para mover a raquete.\\n\\n2. Quebre todos os blocos
     para avan\xE7ar.\\n\\n3. Nao deixe a bola cair!\\n\\n4. Voce tem 3 vidas.\\n\\n5.
-    Boa sorte!"
+    Cada bloco vale 10 pontos!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -860,8 +860,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 22
+  m_fontSizeBase: 22
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
