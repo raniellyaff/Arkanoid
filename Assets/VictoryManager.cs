@@ -4,20 +4,35 @@ using TMPro;
 
 public class VictoryManager : MonoBehaviour
 {
-    public TextMeshProUGUI finalScoreText;
-    public TextMeshProUGUI victoryMessageText;
+    [Header("UI References")]
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI titleText;
     
     void Start()
     {
-        // Mostra a pontuação final
-        if (finalScoreText != null && ScoreManager.Instance != null)
+        // Verifica qual cena está carregada
+        string sceneName = SceneManager.GetActiveScene().name;
+        bool isVictory = sceneName == "Vitoria";
+        
+        // Atualiza o título
+        if (titleText != null)
         {
-            finalScoreText.text = $" Pontuação Final: {ScoreManager.Instance.GetScore()}";
+            if (isVictory)
+            {
+                titleText.text = "PARABENS!";
+                titleText.color = new Color(1f, 0.84f, 0f); // Dourado
+            }
+            else
+            {
+                titleText.text = "GAME OVER";
+                titleText.color = Color.red;
+            }
         }
         
-        if (victoryMessageText != null)
+        // Mostra o score final
+        if (scoreText != null && ScoreManager.Instance != null)
         {
-            victoryMessageText.text = " PARABÉNS!\nVocê venceu o jogo!";
+            scoreText.text = $"Score: {ScoreManager.Instance.GetScore()}";
         }
         
         // Pausa o jogo
@@ -33,15 +48,18 @@ public class VictoryManager : MonoBehaviour
             ScoreManager.Instance.ResetScore();
         }
         
-        SceneManager.LoadScene("Inicial");
+        SceneManager.LoadScene("Scene1");
     }
     
-    public void QuitGame()
+    public void GoToMenu()
     {
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-        #else
-            Application.Quit();
-        #endif
+        Time.timeScale = 1f;
+        
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.ResetScore();
+        }
+        
+        SceneManager.LoadScene("Inicial");
     }
 }

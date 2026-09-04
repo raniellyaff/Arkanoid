@@ -9,6 +9,7 @@ public class LevelManager : MonoBehaviour
     public GameObject levelCompletePanel;
     public TMPro.TextMeshProUGUI levelCompleteText;
     public TMPro.TextMeshProUGUI levelFinalScoreText;
+    public TMPro.TextMeshProUGUI nextLevelButtonText; // ← NOVO: Texto do botão
     
     private bool isLevelComplete = false;
     
@@ -59,11 +60,26 @@ public class LevelManager : MonoBehaviour
             levelCompletePanel.SetActive(true);
         }
         
+        // Atualiza o texto do título
         if (levelCompleteText != null)
         {
             string sceneName = SceneManager.GetActiveScene().name;
             string levelName = sceneName == "Scene1" ? "Fase 1" : "Fase 2";
             levelCompleteText.text = $"PARABENS!\n{levelName} Concluida!";
+        }
+        
+        // Atualiza o texto do botão baseado na cena
+        if (nextLevelButtonText != null)
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName == "Scene1")
+            {
+                nextLevelButtonText.text = "Proximo Nivel"; // ← Scene1: Próximo Nível
+            }
+            else if (sceneName == "Scene2")
+            {
+                nextLevelButtonText.text = "Ver Resultado"; // ← Scene2: Ver Resultado
+            }
         }
         
         if (levelFinalScoreText != null && ScoreManager.Instance != null)

@@ -165,24 +165,10 @@ public class ScoreManager : MonoBehaviour
     void GameOver()
     {
         isGameOver = true;
+        Time.timeScale = 1f; // Volta o tempo para carregar a cena
         
-        FindAndConnectUI();
-        
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(true);
-        }
-        else
-        {
-            CreateGameOverPanel();
-        }
-        
-        if (gameOverScoreText != null)
-        {
-            gameOverScoreText.text = $"Score Final: {score}";
-        }
-        
-        Time.timeScale = 0f;
+        // Carrega a cena de Derrota
+        SceneManager.LoadScene("Derrota");
     }
     
     void CreateGameOverPanel()
