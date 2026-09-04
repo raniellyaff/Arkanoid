@@ -12,12 +12,12 @@ public class VictoryManager : MonoBehaviour
         // Mostra a pontuação final
         if (finalScoreText != null && ScoreManager.Instance != null)
         {
-            finalScoreText.text = $"🏆 Pontuação Final: {ScoreManager.Instance.GetScore()}";
+            finalScoreText.text = $" Pontuação Final: {ScoreManager.Instance.GetScore()}";
         }
         
         if (victoryMessageText != null)
         {
-            victoryMessageText.text = "🎉 PARABÉNS!\nVocê venceu o jogo!";
+            victoryMessageText.text = " PARABÉNS!\nVocê venceu o jogo!";
         }
         
         // Pausa o jogo

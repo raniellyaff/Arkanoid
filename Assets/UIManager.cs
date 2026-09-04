@@ -23,14 +23,12 @@ public class UIManager : MonoBehaviour
         
         if (scoreText != null)
         {
-            int score = ScoreManager.Instance.GetScore();
-            scoreText.text = $"Score: {score}";
+            scoreText.text = $"Score: {ScoreManager.Instance.GetScore()}";
         }
         
         if (livesText != null)
         {
-            int lives = ScoreManager.Instance.GetLives();
-            livesText.text = $"Vidas: {lives}";
+            livesText.text = $"Vidas: {ScoreManager.Instance.GetLives()}";
         }
     }
 }

@@ -10,11 +10,8 @@ public class RestartButton : MonoBehaviour
         }
         else
         {
-            // Fallback se não tiver ScoreManager
             Time.timeScale = 1f;
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-            );
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Scene1");
         }
     }
 }
