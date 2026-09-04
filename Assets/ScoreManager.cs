@@ -268,4 +268,11 @@ public class ScoreManager : MonoBehaviour
         
         SceneManager.LoadScene("Scene1");
     }
+
+    public void GoToMenu()
+    {
+        Time.timeScale = 1f;
+        ResetScore();
+        SceneManager.LoadScene("Inicial");
+    }
 }
