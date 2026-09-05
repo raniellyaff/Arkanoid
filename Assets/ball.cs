@@ -7,12 +7,14 @@ public class ball : MonoBehaviour
     private bool canCollide = true;
     private bool isBallActive = false;
     
-    public float ballSpeed = 8f;
-    public float minAngle = 15f;
-    public float maxAngle = 70f;
+    public float ballSpeed = 5f;
+    public float minAngle = 25f;
+    public float maxAngle = 65f;
     
     private Vector2 startPosition;
     private GameObject startButton;
+    private float lastDirectionY = -1f;
+    private float lastDirectionX = 0f;
 
     void Start()
     {
@@ -23,9 +25,10 @@ public class ball : MonoBehaviour
         rb2d.angularDamping = 0;
         rb2d.sharedMaterial = null;
         rb2d.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        
         rb2d.gravityScale = 0f;
         rb2d.linearVelocity = Vector2.zero;
+        rb2d.constraints = RigidbodyConstraints2D.FreezeRotation;
+        
         isBallActive = false;
         
         CancelInvoke();
@@ -39,23 +42,33 @@ public class ball : MonoBehaviour
         if (isBallActive) return;
         
         isBallActive = true;
-        rb2d.gravityScale = 1f;
-        
         HideStartButton();
         GoBall();
     }
 
     void GoBall()
     {
-        Vector2 direction = new Vector2(0, -1).normalized;
+        float angle = Random.Range(-15f, 15f);
+        float rad = angle * Mathf.Deg2Rad;
+        Vector2 direction = new Vector2(Mathf.Sin(rad), -Mathf.Cos(rad)).normalized;
+        
+        if (direction.y > -0.1f)
+        {
+            direction.y = -1f;
+            direction.Normalize();
+        }
+        
         rb2d.linearVelocity = direction * ballSpeed;
         canCollide = true;
+        lastDirectionY = -1f;
+        lastDirectionX = direction.x;
     }
 
     void OnCollisionEnter2D(Collision2D coll)
     {
         if (!canCollide) return;
         
+        // ===== RAQUETE =====
         if (coll.collider.CompareTag("Player"))
         {
             canCollide = false;
@@ -67,15 +80,28 @@ public class ball : MonoBehaviour
             {
                 angle = Mathf.Sign(angle) * minAngle;
             }
+            if (Mathf.Abs(angle) > maxAngle)
+            {
+                angle = Mathf.Sign(angle) * maxAngle;
+            }
             
             float rad = angle * Mathf.Deg2Rad;
             Vector2 direction = new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)).normalized;
             
+            if (direction.y < 0.3f)
+            {
+                direction.y = 0.5f;
+                direction.Normalize();
+            }
+            
             rb2d.linearVelocity = direction * ballSpeed;
+            lastDirectionY = 1f;
+            lastDirectionX = direction.x;
             
             Invoke("EnableCollision", 0.1f);
         }
         
+        // ===== BLOCOS =====
         if (coll.gameObject.CompareTag("Brick"))
         {
             Brick brickScript = coll.gameObject.GetComponent<Brick>();
@@ -92,21 +118,50 @@ public class ball : MonoBehaviour
             float angleDeg = Mathf.Atan2(Mathf.Abs(newVelocity.y), Mathf.Abs(newVelocity.x)) * Mathf.Rad2Deg;
             if (angleDeg < minAngle)
             {
-                newVelocity.y = Mathf.Sign(newVelocity.y) * 0.3f;
+                newVelocity.y = Mathf.Sign(newVelocity.y) * 0.5f;
+                newVelocity.x = Mathf.Sign(newVelocity.x) * 0.8f;
+                newVelocity.Normalize();
+            }
+            
+            if (Mathf.Abs(newVelocity.y) < 0.3f)
+            {
+                newVelocity.y = lastDirectionY * 0.5f;
                 newVelocity.Normalize();
             }
             
             rb2d.linearVelocity = newVelocity * ballSpeed;
+            lastDirectionX = newVelocity.x;
         }
         
-        if (coll.collider.CompareTag("LeftWall") || coll.collider.CompareTag("RightWall") || coll.collider.CompareTag("TopWall"))
+        // ===== PAREDES (COLISÃO SIMPLES) =====
+        // Parede Esquerda
+        if (coll.collider.CompareTag("LeftWall"))
         {
-            if (rb2d.linearVelocity.magnitude > 0)
-            {
-                rb2d.linearVelocity = rb2d.linearVelocity.normalized * ballSpeed;
-            }
+            Vector2 vel = rb2d.linearVelocity;
+            vel.x = Mathf.Abs(vel.x); // Força para a direita
+            rb2d.linearVelocity = vel.normalized * ballSpeed;
+            lastDirectionX = 1f;
         }
         
+        // Parede Direita
+        if (coll.collider.CompareTag("RightWall"))
+        {
+            Vector2 vel = rb2d.linearVelocity;
+            vel.x = -Mathf.Abs(vel.x); // Força para a esquerda
+            rb2d.linearVelocity = vel.normalized * ballSpeed;
+            lastDirectionX = -1f;
+        }
+        
+        // Parede Superior
+        if (coll.collider.CompareTag("TopWall"))
+        {
+            Vector2 vel = rb2d.linearVelocity;
+            vel.y = -Mathf.Abs(vel.y); // Força para baixo
+            rb2d.linearVelocity = vel.normalized * ballSpeed;
+            lastDirectionY = -1f;
+        }
+        
+        // ===== CHÃO (PERDE VIDA) =====
         if (coll.collider.CompareTag("BottomWall"))
         {
             if (ScoreManager.Instance != null)
@@ -138,6 +193,8 @@ public class ball : MonoBehaviour
         transform.position = startPosition;
         canCollide = true;
         isBallActive = false;
+        lastDirectionY = -1f;
+        lastDirectionX = 0f;
     }
     
     void ShowStartButton()
